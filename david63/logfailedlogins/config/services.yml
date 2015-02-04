@@ -1,0 +1,9 @@
+services:
+    david63.logfailedlogins.listener:
+        class: david63\logfailedlogins\event\listener
+        arguments:
+            - @config
+            - @log
+            - @user
+        tags:
+            - { name: event.listener }
