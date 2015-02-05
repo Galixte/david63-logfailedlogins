@@ -110,35 +110,38 @@ class listener implements EventSubscriberInterface
 			$additional_data = array();
 			$additional_data['reportee_id']	= $result['user_row']['user_id'];
 
+			// We want to log Admin fails to the Admin log and User fails to the user log
+			$log_type = ($result['user_row']['user_type'] == 3) ? 'admin' : 'user';
+
 			switch ($result['status'])
 			{
 				case 10:
 					$error_msg			= 'ERROR_LOGIN_USERNAME';
-					$user_ip			= $this->user->data['user_ip'];
-					$log_type			= 'user';
+					$log_type			= 'user'; // This can only be user as we have no data to test
 					$additional_data[]	= $username;
 				break;
 
 				case 11:
 					$error_msg	= 'ERROR_LOGIN_PASSWORD';
-					$user_ip	= $result['user_row']['user_ip'];
-					$log_type	= ($result['user_row']['user_type'] == 3) ? 'admin' : 'user';
 				break;
 
 				case 13:
 					$error_msg	= 'ERROR_LOGIN_ATTEMPTS';
-					$user_ip	= $result['user_row']['user_ip'];
-					$log_type	= ($result['user_row']['user_type'] == 3) ? 'admin' : 'user';
 				break;
 
 				case 15:
 					$error_msg	= 'ERROR_LOGIN_PASSWORD_CONVERT';
-					$user_ip	= $result['user_row']['user_ip'];
-					$log_type	= ($result['user_row']['user_type'] == 3) ? 'admin' : 'user';
+				break;
+
+				default: // Let's have a catchall for any other fails
+					$error_msg			= 'ERROR_LOGIN_UNKNOWN';
+					$log_type			= 'user';
+					$additional_data[]	= $result['status'];
+					$additional_data[]	= $username;
 				break;
 			}
 
-			$this->log->add($log_type, $result['user_row']['user_id'], $user_ip, $error_msg, time(), $additional_data);
+			$this->log->add($log_type, $result['user_row']['user_id'], $this->user->ip, $error_msg, time(), $additional_data);
 		}
 	}
 }
