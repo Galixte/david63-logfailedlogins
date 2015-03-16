@@ -15,7 +15,6 @@ class version_1_0_0 extends \phpbb\db\migration\migration
 	{
 		return array(
 			array('config.add', array('logfailedlogins_version', '1.0.0')),
-			array('config.add', array('log_failed_logins', '0')),
 		);
 	}
 }

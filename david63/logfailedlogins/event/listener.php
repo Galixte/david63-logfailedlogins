@@ -22,26 +22,36 @@ class listener implements EventSubscriberInterface
 	/** @var \phpbb\config\config */
 	protected $config;
 
-	/** @var \phpbb\request\request */
-	protected $request;
-
 	/** @var \phpbb\log\log */
 	protected $log;
+
+	/** @var \phpbb\user */
+	protected $user;
+
+	/** @var \phpbb\auth\auth */
+	protected $auth;
+
+	/** @var \phpbb\db\driver\driver_interface */
+	protected $db;
 
 	/**
 	* Constructor for listener
 	*
-	* @param \phpbb\config\config	$config		phpBB config
-	* @param \phpbb\log\log			$log		phpBB log
-	* @param \phpbb\user            $user		User object
+	* @param \phpbb\config\config				$config		phpBB config
+	* @param \phpbb\log\log						$log		phpBB log
+	* @param \phpbb\user            			$user		User object
+	* @param \phpbb\auth\auth 					$auth
+	* @param \phpbb\db\driver\driver_interface	$db
 	*
 	* @access public
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\log\log $log, \phpbb\user $user)
+	public function __construct(\phpbb\config\config $config, \phpbb\log\log $log, \phpbb\user $user, \phpbb\auth\auth $auth, \phpbb\db\driver\driver_interface $db)
 	{
 		$this->config	= $config;
 		$this->log		= $log;
 		$this->user		= $user;
+		$this->auth		= $auth;
+		$this->db		= $db;
 	}
 
 	/**
@@ -54,47 +64,12 @@ class listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.acp_board_config_edit_add'	=> 'acp_board_settings',
-			'core.login_box_failed'				=> 'failed_login',
+			'core.login_box_failed' => 'failed_login',
 		);
 	}
 
 	/**
-	* Set ACP board settings
-	*
-	* @param object $event The event object
-	* @return null
-	* @access public
-	*/
-	public function acp_board_settings($event)
-	{
-		if ($event['mode'] == 'registration')
-		{
-			$new_display_var = array(
-				'title'	=> $event['display_vars']['title'],
-				'vars'	=> array(),
-			);
-
-			foreach ($event['display_vars']['vars'] as $key => $content)
-			{
-				$new_display_var['vars'][$key] = $content;
-				if ($key == 'chg_passforce')
-				{
-					$new_display_var['vars']['log_failed_logins'] = array(
-						'lang'		=> 'FAILED_LOGINS',
-						'validate'	=> 'bool',
-						'type'		=> 'radio:yes_no',
-						'explain' 	=> true,
-					);
-				}
-			}
-
-			$event->offsetSet('display_vars', $new_display_var);
-		}
-	}
-
-	/**
-	* Log the new user
+	* Log failed login attempts
 	*
 	* @param object $event The event object
 	* @return null
@@ -102,46 +77,56 @@ class listener implements EventSubscriberInterface
 	*/
 	public function failed_login($event)
 	{
-		if ($this->config['log_failed_logins'] == true)
+		$result		= $event['result'];
+		$username	= $event['username'];
+
+		$additional_data = array();
+		$additional_data['reportee_id']	= $result['user_row']['user_id'];
+
+		// We want to log Admin fails to the Admin log and User fails to the user log
+		$log_type = $this->get_userid_from_username($username);
+
+		switch ($result['status'])
 		{
-			$result		= $event['result'];
-			$username	= $event['username'];
+			case LOGIN_ERROR_USERNAME:
+				$error_msg			= 'ERROR_LOGIN_USERNAME';
+				$log_type			= 'user'; // This can only be user as we have no data to test
+				$additional_data[]	= $username;
+			break;
 
-			$additional_data = array();
-			$additional_data['reportee_id']	= $result['user_row']['user_id'];
+			case LOGIN_ERROR_PASSWORD:
+				$error_msg	= 'ERROR_LOGIN_PASSWORD';
+			break;
 
-			// We want to log Admin fails to the Admin log and User fails to the user log
-			$log_type = ($result['user_row']['user_type'] == 3) ? 'admin' : 'user';
+			case LOGIN_ERROR_ATTEMPTS:
+				$error_msg	= 'ERROR_LOGIN_ATTEMPTS';
+			break;
 
-			switch ($result['status'])
-			{
-				case 10:
-					$error_msg			= 'ERROR_LOGIN_USERNAME';
-					$log_type			= 'user'; // This can only be user as we have no data to test
-					$additional_data[]	= $username;
-				break;
+			case LOGIN_ERROR_PASSWORD_CONVERT:
+				$error_msg	= 'ERROR_LOGIN_PASSWORD_CONVERT';
+			break;
 
-				case 11:
-					$error_msg	= 'ERROR_LOGIN_PASSWORD';
-				break;
-
-				case 13:
-					$error_msg	= 'ERROR_LOGIN_ATTEMPTS';
-				break;
-
-				case 15:
-					$error_msg	= 'ERROR_LOGIN_PASSWORD_CONVERT';
-				break;
-
-				default: // Let's have a catchall for any other fails
-					$error_msg			= 'ERROR_LOGIN_UNKNOWN';
-					$log_type			= 'user';
-					$additional_data[]	= $result['status'];
-					$additional_data[]	= $username;
-				break;
-			}
-
-			$this->log->add($log_type, $result['user_row']['user_id'], $this->user->ip, $error_msg, time(), $additional_data);
+			default: // Let's have a catchall for any other fails
+				$error_msg			= 'ERROR_LOGIN_UNKNOWN';
+				$log_type			= 'user';
+				$additional_data[]	= $result['status'];
+				$additional_data[]	= $username;
+			break;
 		}
+
+		$this->log->add($log_type, $result['user_row']['user_id'], $this->user->ip, $error_msg, time(), $additional_data);
+	}
+
+	protected function get_userid_from_username($username)
+	{
+		$sql = 'SELECT user_id
+			FROM ' . USERS_TABLE . '
+				WHERE ' . "username_clean = '" . $this->db->sql_escape(utf8_clean_string($username)) . "'";
+
+		$result  = $this->db->sql_query($sql);
+		$user_id = (int) $this->db->sql_fetchfield('user_id');
+		$this->db->sql_freeresult($result);
+
+		return ($this->auth->acl_raw_data($user_id, 'a_')) ? 'admin' : 'user';
 	}
 }
