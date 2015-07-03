@@ -46,5 +46,5 @@ $lang = array_merge($lang, array(
 	'ERROR_LOGIN_USERNAME'			=> '<strong>Un nom d’utilisateur incorrect a été saisi</strong><br />» %1$s',
 
 	'FAILED_LOGINS'					=> 'Journal des tentatives de connexions échouées',
-	'FAILED_LOGINS_EXPLAIN'			=> 'Ajoute une entrée dans le journal d’utilisateur ou du journal l’administration lorsqu’un utilisateur ne parvient pas à s’identifier.',
+	'FAILED_LOGINS_EXPLAIN'			=> 'Ajoute une entrée dans le journal d’utilisateur ou le journal l’administration lorsqu’un utilisateur ne parvient pas à s’identifier.',
 ));
