@@ -37,10 +37,11 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, array(
+	'ERROR_LOGIN_ACTIVE'			=> '<strong>Attempted login by inactive user</strong>',
 	'ERROR_LOGIN_ATTEMPTS'			=> '<strong>User has exceeded the login attempts</strong>',
 	'ERROR_LOGIN_PASSWORD'			=> '<strong>The user entered an incorrect password</strong>',
 	'ERROR_LOGIN_PASSWORD_CONVERT'	=> '<strong>Password convert error</strong>',
-	'ERROR_LOGIN_UNKNOWN'			=> '<strong>An unexpected login error (%1$s) occurred</strong><br />» %2$s',
+	'ERROR_LOGIN_UNKNOWN'			=> '<strong>An unexpected login error (#%1$s) occurred</strong><br />» %2$s',
 	'ERROR_LOGIN_USERNAME'			=> '<strong>Invalid username has been entered</strong><br />» %1$s',
 
 	'FAILED_LOGINS'					=> 'Log failed user logins',

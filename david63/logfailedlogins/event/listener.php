@@ -84,7 +84,7 @@ class listener implements EventSubscriberInterface
 		$additional_data['reportee_id']	= $result['user_row']['user_id'];
 
 		// We want to log Admin fails to the Admin log and User fails to the user log
-		$log_type = $this->get_userid_from_username($username);
+		$log_type = $this->get_usertype_from_username($username);
 
 		switch ($result['status'])
 		{
@@ -96,6 +96,10 @@ class listener implements EventSubscriberInterface
 
 			case LOGIN_ERROR_PASSWORD:
 				$error_msg	= 'ERROR_LOGIN_PASSWORD';
+			break;
+
+			case LOGIN_ERROR_ACTIVE:
+				$error_msg	= 'ERROR_LOGIN_ACTIVE';
 			break;
 
 			case LOGIN_ERROR_ATTEMPTS:
@@ -117,7 +121,13 @@ class listener implements EventSubscriberInterface
 		$this->log->add($log_type, $result['user_row']['user_id'], $this->user->ip, $error_msg, time(), $additional_data);
 	}
 
-	protected function get_userid_from_username($username)
+	/**
+	* Get username
+	*
+	* @return user type
+	* @access protected
+	*/
+	protected function get_usertype_from_username($username)
 	{
 		$sql = 'SELECT user_id
 			FROM ' . USERS_TABLE . '

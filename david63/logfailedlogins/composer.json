@@ -3,7 +3,7 @@
 	"type": "phpbb-extension",
 	"description": "Adds an entry in the User or Admin logs when there is a failed user login attempt",
 	"homepage": "",
-	"version": "1.0.1",
+	"version": "1.0.3",
 	"time": "2015-05-16",
 	"license": "GPL-2.0",
 	"authors": [{
