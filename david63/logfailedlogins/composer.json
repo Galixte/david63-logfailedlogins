@@ -3,14 +3,14 @@
 	"type": "phpbb-extension",
 	"description": "Adds an entry in the User or Admin logs when there is a failed user login attempt",
 	"homepage": "",
-	"version": "1.0.3",
-	"time": "2015-05-16",
+	"version": "1.0.4",
+	"time": "2015-11-01",
 	"license": "GPL-2.0",
 	"authors": [{
 			"name": "David Wood",
 			"username": "david63",
-			"email": "david@webworld.xyz",
-			"homepage": "http://webworld.xyz",
+			"email": "",
+			"homepage": "",
 			"role": "Developer"
 		}],
 	"require": {

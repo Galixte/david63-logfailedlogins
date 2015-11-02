@@ -80,6 +80,9 @@ class listener implements EventSubscriberInterface
 		$result		= $event['result'];
 		$username	= $event['username'];
 
+		// If we do not have a user id then set it to anonymous user
+		$result['user_row']['user_id'] = (!$result['user_row']['user_id']) ? 'ANONYMOUS' : $result['user_row']['user_id'];
+
 		$additional_data = array();
 		$additional_data['reportee_id']	= $result['user_row']['user_id'];
 
