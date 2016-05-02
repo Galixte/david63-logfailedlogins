@@ -1,0 +1,10 @@
+services:
+    david63.logfailedlogins.listener:
+        class: david63\logfailedlogins\event\listener
+        arguments:
+            - '@log'
+            - '@user'
+            - '@auth'
+            - '@dbal.conn'
+        tags:
+            - { name: event.listener }
