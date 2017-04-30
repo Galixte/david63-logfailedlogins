@@ -4,7 +4,7 @@
 * Log Failed Logins extension for the phpBB Forum Software package.
 * French translation by Galixte (http://www.galixte.com)
 *
-* @copyright (c) 2015 ForumHulp <https://www.forumhulp.com>
+* @copyright (c) 2015 david63
 * @license GNU General Public License, version 2 (GPL-2.0)
 *
 */
