@@ -39,10 +39,11 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, array(
+	'ERROR_LOGIN_ACTIVE'			=> '<strong>Une tentative de connexion par un utilisateur inactif</strong>',
 	'ERROR_LOGIN_ATTEMPTS'			=> '<strong>La limite du nombre de tentatives de connexions autorisées a été atteinte</strong>',
 	'ERROR_LOGIN_PASSWORD'			=> '<strong>Un mot de passe incorrect a été saisi</strong>',
 	'ERROR_LOGIN_PASSWORD_CONVERT'	=> '<strong>Une erreur s’est produite durant la modification du mot de passe</strong>',
-	'ERROR_LOGIN_UNKNOWN'			=> '<strong>Une erreur inattendue s’est produite durant la connexion (%1$s)</strong><br />» %2$s',
+	'ERROR_LOGIN_UNKNOWN'			=> '<strong>Une erreur inattendue s’est produite durant la connexion (#%1$s)</strong><br />» %2$s',
 	'ERROR_LOGIN_USERNAME'			=> '<strong>Un nom d’utilisateur incorrect a été saisi</strong><br />» %1$s',
 
 	'FAILED_LOGINS'					=> 'Journal des tentatives de connexions échouées',
